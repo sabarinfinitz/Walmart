@@ -1,24 +1,77 @@
-import logo from './logo.svg';
-import './App.css';
+import React, { useEffect } from "react";
+import {
+  BrowserRouter as Router,
+  Routes,
+  Route,
+  Navigate,
+} from "react-router-dom";
+import LoginRegister from "./pages/LoginRegister";
+import Home from "./pages/Home";
+import WishlistPage from "./pages/WishlistPage";
+import FakeStore from "./pages/FakeStore";
+import Navbar from "./components/Navbar";
+
+function PrivateRoute({ children }) {
+  const token = localStorage.getItem("token");
+  return token ? children : <Navigate to="/login" />;
+}
 
 function App() {
+  useEffect(() => {
+    const handler = () => {};
+    window.addEventListener("storage", handler);
+    return () => window.removeEventListener("storage", handler);
+  }, []);
   return (
-    <div className="App">
-      <header className="App-header">
-        <img src={logo} className="App-logo" alt="logo" />
-        <p>
-          Edit <code>src/App.js</code> and save to reload.
-        </p>
-        <a
-          className="App-link"
-          href="https://reactjs.org"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Learn React
-        </a>
-      </header>
-    </div>
+    <Router>
+      <div className="min-h-screen bg-gray-50 text-gray-900 p-6">
+        <Routes>
+          <Route path="/login" element={<LoginRegister onAuth={() => {}} />} />
+          <Route
+            path="/fakestore"
+            element={
+              <PrivateRoute>
+                <>
+                  <Navbar />
+                  <FakeStore />
+                </>
+              </PrivateRoute>
+            }
+          />
+          <Route
+            path="/"
+            element={
+              <Navigate
+                to={localStorage.getItem("token") ? "/fakestore" : "/login"}
+                replace
+              />
+            }
+          />
+          <Route
+            path="/wishlist/:id"
+            element={
+              <PrivateRoute>
+                <>
+                  <Navbar />
+                  <WishlistPage />
+                </>
+              </PrivateRoute>
+            }
+          />
+          <Route
+            path="/home"
+            element={
+              <PrivateRoute>
+                <>
+                  <Navbar />
+                  <Home />
+                </>
+              </PrivateRoute>
+            }
+          />
+        </Routes>
+      </div>
+    </Router>
   );
 }
 
